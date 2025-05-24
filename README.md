@@ -2,90 +2,124 @@
 
 This app lets you collect Fireflies recordings for Brandon and browse them easily with Streamlit.
 
-## Quick Start
-
-### 1. Start PostgreSQL with Docker Compose
-
-```
-docker-compose up -d
-```
-
-This will start PostgreSQL and create the `recordings` table automatically.
-
-### 2. Run the N8N Workflow
-- Import and run the provided N8N workflow to fetch Brandon's recordings and store them in the database.
-
-### 3. Install Python Dependencies
-
-```
-pip install -r requirements.txt
-```
-
-### 4. Start the Streamlit App
-
-```
-streamlit run fireflies_streamlit_app.py
-```
-
-Then open the provided local URL in your browser to browse and filter Brandon's recordings.
-
 ---
 
-## Deploying to DigitalOcean
+## 🚀 Local Development (Run on Your Own Computer)
 
-You can deploy this app to a DigitalOcean droplet for remote access and automation.
+Follow these steps exactly to get the app running locally:
 
-### 1. Create a Droplet
-- Go to [DigitalOcean](https://cloud.digitalocean.com/droplets)
-- Create a new droplet (Ubuntu 22.04 recommended, 1GB+ RAM)
-- Add your SSH key or set a root password
-- Note the droplet's public IP address
+### 1. Install Prerequisites
+- **Install Docker Desktop:** [Download here](https://www.docker.com/products/docker-desktop/)
+- **Install Git:** [Download here](https://git-scm.com/downloads)
 
-### 2. SSH Into Your Droplet
-```
-ssh root@your_droplet_ip
-```
-
-### 3. Install Docker and Docker Compose
-```
-apt update && apt install -y docker.io docker-compose git
-systemctl enable --now docker
-```
-
-### 4. Clone Your Project Repo
-```
+### 2. Clone the Repository
+Open a terminal and run:
+```sh
 git clone https://github.com/yourusername/fireflies-app.git
 cd fireflies-app
 ```
 
-### 5. Start PostgreSQL
-```
+### 3. Start the App with Docker Compose
+In the project folder, run:
+```sh
 docker-compose up -d
 ```
+- This will start both the PostgreSQL database and the Streamlit app in separate containers.
+- The first time you run this, Docker will build the Streamlit app image.
 
-### 6. Install Python and Streamlit
-```
-apt install -y python3 python3-pip
-pip3 install -r requirements.txt
-```
-
-### 7. Run the Streamlit App
-```
-nohup streamlit run fireflies_streamlit_app.py --server.port 8501 --server.address 0.0.0.0 &
-```
-- The app will be available at `http://your_droplet_ip:8501`
-
-### 8. (Optional) Run N8N on the Droplet
-- You can install N8N using Docker or npm, or connect to your existing N8N instance.
-- If running N8N here, expose its port (default 5678) and set up the workflow as before.
-
-### 9. Open Firewall Ports
-- Make sure ports 5432 (PostgreSQL, if remote access needed), 8501 (Streamlit), and 5678 (N8N, if used) are open in your DigitalOcean dashboard.
+### 4. Access the App
+- Open your browser and go to [http://localhost:8501](http://localhost:8501)
+- You can now browse and filter Brandon's recordings.
 
 ---
 
-## Troubleshooting
-- Make sure Docker is running.
-- If you change the database credentials, update them in both `docker-compose.yml` and `fireflies_streamlit_app.py`.
-- If you want to reset the database, run `docker-compose down -v` and then `docker-compose up -d` again.
-- For production, consider using a process manager (like systemd or pm2) for Streamlit and N8N. 
+## 🚀 Deployment (Run on a Remote Server like DigitalOcean)
+
+Follow these steps to deploy the app for remote access:
+
+### 1. Create a DigitalOcean Droplet
+- Go to [DigitalOcean](https://cloud.digitalocean.com/droplets)
+- Create a new droplet (Ubuntu 22.04+, 1GB+ RAM)
+- Add your SSH key or set a root password
+- Note your droplet's public IP address
+
+### 2. Connect to Your Droplet
+On your local machine, run:
+```sh
+ssh root@your_droplet_ip
+```
+
+### 3. Install Required Software on the Droplet
+Run these commands one by one:
+```sh
+apt update
+apt install -y docker.io docker-compose git
+systemctl enable --now docker
+```
+
+### 4. Clone the Project Repo
+```sh
+git clone https://github.com/yourusername/fireflies-app.git
+cd fireflies-app
+```
+
+### 5. Start the App with Docker Compose
+```sh
+docker-compose up -d
+```
+- This will start both the PostgreSQL database and the Streamlit app in separate containers.
+
+### 6. Access the App
+- The app will be available at:
+  - **Production:** https://ff.projectassistant.ai
+  - **Staging:** https://staging.ff.projectassistant.ai
+- You must configure your DNS and reverse proxy (e.g., Nginx) to point these URLs to your server's public IP and port 8501.
+
+### 7. Open Firewall Ports
+- In the DigitalOcean dashboard, open these ports:
+  - **5432** (PostgreSQL, only if you need remote DB access)
+  - **8501** (Streamlit web app)
+
+---
+
+## ⚙️ Environment Variables
+
+All environment variables are set in `docker-compose.yml` under the `web` and `db` services. You do NOT need to create a `.env` file for the Python app.
+
+**Database variables (used by the app):**
+- `DB_HOST`: Database host (should be `db` for Docker Compose)
+- `DB_PORT`: Database port (default: `5432`)
+- `DB_USER`: Database username (default: `firefliesuser`)
+- `DB_PASSWORD`: Database password (default: `firefliespass`)
+- `DB_NAME`: Database name (default: `firefliesdb`)
+
+**PostgreSQL variables (used by the db service):**
+- `POSTGRES_USER`: Database username
+- `POSTGRES_PASSWORD`: Database password
+- `POSTGRES_DB`: Database name
+
+If you change any of these in `docker-compose.yml`, make sure the values match between the `db` and `web` services.
+
+---
+
+## 🧠 Cline Memory Bank
+
+The Cline Memory Bank lets you save, search, and manage notes or context snippets directly within the Fireflies app interface.
+
+**Capabilities:**
+- Add new notes with a title and content
+- Search notes by title
+- View all notes in a table
+- Notes are stored in the PostgreSQL database for persistence
+
+**How to use:**
+- Use the "Cline Memory Bank" section in the app interface to add or search notes.
+- All notes are persistent and can be managed from the web UI.
+
+---
+
+## 🛠️ Troubleshooting
+- Make sure Docker is running: `docker ps` should show both the database and web containers.
+- If you change database credentials, update them in both `docker-compose.yml` services.
+- To reset the database: `docker-compose down -v` then `docker-compose up -d`.
+- For production, use a process manager (like systemd or pm2) for Docker if needed. 

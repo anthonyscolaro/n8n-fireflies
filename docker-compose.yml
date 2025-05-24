@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    container_name: fireflies-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: firefliesuser
+      POSTGRES_PASSWORD: firefliespass
+      POSTGRES_DB: firefliesdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  web:
+    build: .
+    container_name: fireflies-streamlit
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: firefliesuser
+      DB_PASSWORD: firefliespass
+      DB_NAME: firefliesdb
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: fireflies-nginx
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  db_data: 

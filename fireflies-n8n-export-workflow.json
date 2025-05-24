@@ -1,0 +1,179 @@
+{
+  "name": "Fireflies Export Brandon Recordings",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "none",
+        "url": "https://api.fireflies.ai/v1/users",
+        "options": {},
+        "headers": {
+          "Authorization": "Bearer {{$vars.fireflies}}"
+        }
+      },
+      "id": "1",
+      "name": "Get Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [300, 300],
+      "notesInFlow": true,
+      "notes": "Fetch all users from Fireflies"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Find Brandon by email and set user_id\nconst brandon = items[0].json.users.find(u => u.email === 'brandon.c@projectassistant.org');\nif (!brandon) throw new Error('Brandon not found');\nreturn [{ json: { user_id: brandon.id } }];"
+      },
+      "id": "2",
+      "name": "Find Brandon's User ID",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "notesInFlow": true,
+      "notes": "Find Brandon's user_id by email."
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "url": "=https://api.fireflies.ai/v1/recordings?user_id={{$json[\"user_id\"]}}",
+        "options": {},
+        "headers": {
+          "Authorization": "Bearer {{$vars.fireflies}}"
+        }
+      },
+      "id": "3",
+      "name": "Get Recordings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [700, 300],
+      "notesInFlow": true,
+      "notes": "Fetch all recordings for Brandon."
+    },
+    {
+      "parameters": {
+        "functionCode": "// Flatten and map recordings to DB fields\nreturn items[0].json.recordings.map(r => ({\n  json: {\n    id: r.id,\n    title: r.title,\n    date: r.date,\n    duration: r.duration,\n    download_url: r.download_url,\n    transcript_url: r.transcript_url,\n    user_id: r.user_id,\n    metadata: r\n  }\n}));"
+      },
+      "id": "4",
+      "name": "Prepare DB Records",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "notesInFlow": true,
+      "notes": "Prepare each recording for DB insertion."
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "recordings",
+        "columns": [
+          "id",
+          "title",
+          "date",
+          "duration",
+          "download_url",
+          "transcript_url",
+          "user_id",
+          "metadata"
+        ],
+        "additionalFields": {},
+        "values": [
+          {
+            "column": "id",
+            "value": "={{$json[\"id\"]}}"
+          },
+          {
+            "column": "title",
+            "value": "={{$json[\"title\"]}}"
+          },
+          {
+            "column": "date",
+            "value": "={{$json[\"date\"]}}"
+          },
+          {
+            "column": "duration",
+            "value": "={{$json[\"duration\"]}}"
+          },
+          {
+            "column": "download_url",
+            "value": "={{$json[\"download_url\"]}}"
+          },
+          {
+            "column": "transcript_url",
+            "value": "={{$json[\"transcript_url\"]}}"
+          },
+          {
+            "column": "user_id",
+            "value": "={{$json[\"user_id\"]}}"
+          },
+          {
+            "column": "metadata",
+            "value": "={{JSON.stringify($json[\"metadata\"])}}"
+          }
+        ],
+        "database": "firefliesdb",
+        "user": "firefliesuser",
+        "password": "firefliespass",
+        "host": "localhost",
+        "port": 5432
+      },
+      "id": "5",
+      "name": "Insert into PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1100, 300],
+      "notesInFlow": true,
+      "notes": "Insert each recording into the PostgreSQL database."
+    }
+  ],
+  "connections": {
+    "Get Users": {
+      "main": [
+        [
+          {
+            "node": "Find Brandon's User ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Brandon's User ID": {
+      "main": [
+        [
+          {
+            "node": "Get Recordings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recordings": {
+      "main": [
+        [
+          {
+            "node": "Prepare DB Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare DB Records": {
+      "main": [
+        [
+          {
+            "node": "Insert into PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": [
+    {
+      "name": "fireflies"
+    }
+  ]
+} 
