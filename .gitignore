@@ -12,6 +12,7 @@ dist/
 
 # Compiled Python bytecode
 *.py[cod]
+__pycache__/
 
 # Log files
 *.log
@@ -48,8 +49,46 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Data files that can be large
+*.jsonl
+*.csv
+*.tsv
+*.parquet
+*.sqlite
+*.db
+
+# ML/AI model files
+*.pkl
+*.pickle
+*.model
+*.weights
+*.h5
+
+# Compressed archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
 # Fireflies data exports (large files)
 scripts/fireflies/fireflies_export.jsonl
 scripts/fireflies/*.jsonl
+scripts/fireflies/*.csv
+scripts/fireflies/exports/
+scripts/fireflies/data/
 
+# Environment files
 scripts/fireflies/.env
+.env
+.env.local
+.env.production
+
+# Docker volumes and data
+docker-data/
+volumes/
+
+# Terraform state files (sensitive)
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform/
+# Note: Keep terraform.tfvars.example but ignore the actual secrets file
