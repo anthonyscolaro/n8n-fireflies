@@ -1,0 +1,20 @@
+# DigitalOcean API Token
+# Get from: https://cloud.digitalocean.com/account/api/tokens
+do_token = "dop_v1_your_token_here"
+
+# GitHub repository (update with your actual repo)
+github_repo = "anthonyscolaro/n8n-fireflies"
+github_branch = "main"
+
+# Optional: Custom domain (leave empty if not using)
+# domain_name = "ff.projectassistant.ai"
+
+# Infrastructure sizing (defaults are good for most cases)
+# app_size = "basic-xs"        # $7/month - 512MB RAM
+# db_size = "db-s-1vcpu-1gb"   # $15/month - 1GB RAM
+
+# Region (Singapore by default)
+# region = "sgp1"
+
+# Environment
+# environment = "production" 
