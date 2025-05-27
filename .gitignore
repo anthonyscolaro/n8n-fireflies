@@ -48,4 +48,8 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Fireflies data exports (large files)
+scripts/fireflies/fireflies_export.jsonl
+scripts/fireflies/*.jsonl
+
 scripts/fireflies/.env
